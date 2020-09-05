@@ -1,0 +1,37 @@
+---
+
+- name: Detecting Windows Type
+  raw:  (get-wmiobject Win32_OperatingSystem).ProductType
+  register: wmic
+
+- name: Setting Windows Type To Server
+  when: "wmic.stdout.find('3') != -1"
+  set_fact:
+    windows_type: server
+
+- name: Setting Windows Type To DC
+  when: "wmic.stdout.find('2') != -1"
+  set_fact:
+    windows_type: dc
+
+- name: Setting Windows Type To Client
+  when: "wmic.stdout.find('1') != -1"
+  set_fact:
+    windows_type: client
+
+- name: Create Directories
+  win_file:
+    path: "{{item}}"
+    state: directory
+  with_items:
+    - "C:\\data"
+    - "C:\\Logs"
+    - "{{temp}}"
+
+- name: Disable a service from boot
+  win_service:
+    name: "{{ item }}"
+    start_mode: disabled
+  loop:
+    - PolicyAgent
+    - wuauserv

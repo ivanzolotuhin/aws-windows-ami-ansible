@@ -1,0 +1,42 @@
+---
+
+- name: EC2 AMI Get Password
+  hosts: all
+  gather_facts: no
+
+  tasks:
+  - name: get the Administrator password
+    ec2_win_password:
+      instance_id: "{{instance_id}}"
+      key_file: "~/.ssh/jenkins.pem"
+    register: "win_password_output"
+    delegate_to: localhost
+
+- name: EC2 AMI Configure
+  hosts: all
+
+  vars:
+    ansible_user: Administrator
+    ansible_password: "{{ win_password_output.win_password }}"
+    ansible_port: 5986
+    ansible_connection: winrm
+    ansible_winrm_server_cert_validation: ignore
+    ansible_winrm_operation_timeout_sec: 90
+    ansible_winrm_read_timeout_sec: 120
+    temp: C:\\Windows\\temp
+
+  roles:
+    - role: windows-update
+    - role: windows-webserver
+
+  post_tasks:
+    - name: Sysprep Command schedules the instance to initialize during the next boot
+      win_shell: C:\ProgramData\Amazon\EC2-Windows\Launch\Scripts\InitializeInstance.ps1 -Schedule
+
+#    - name: Sysprep Command
+#      win_shell: C:\ProgramData\Amazon\EC2-Windows\Launch\Scripts\SysprepInstance.ps1 -NoShutdown
+#      async: 45
+#      poll: 0
+
+#    - name: Wait 120s for Sysprep
+#      pause: seconds=120

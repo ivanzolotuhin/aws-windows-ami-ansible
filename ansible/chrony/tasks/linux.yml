@@ -1,0 +1,31 @@
+---
+
+- name: uninstall the NTP service
+  action: >
+    {{ ansible_pkg_mgr }} name=ntp* state=absent update_cache=yes
+
+- name: install Chrony
+  action: >
+    {{ ansible_pkg_mgr }} name=chrony state=present update_cache=yes
+
+- name: set the preferred time source (CentOS)
+  lineinfile:
+    dest: /etc/chrony.conf
+    regexp: '^server 169.254.169.123'
+    insertbefore: '^server 0'
+    line: 'server 169.254.169.123 prefer iburst'
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: set the preferred time source (Ubuntu)
+  lineinfile:
+    dest: /etc/chrony/chrony.conf
+    regexp: '^server 169.254.169.123'
+    insertbefore: '^server 0'
+    line: 'server 169.254.169.123 prefer iburst'
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: start the Chrony daemon
+  service:
+    name: chrony
+    state: started
+    enabled: yes

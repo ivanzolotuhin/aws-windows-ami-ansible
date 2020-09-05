@@ -1,0 +1,51 @@
+---
+- name: Get thumbprint
+  raw: (Get-ChildItem -path cert:\LocalMachine\My | where { $_.Subject -match "CN\=EC2" }).thumbprint
+  register: thumb
+
+- name: Default Web Site
+  win_iis_website:
+    name: "Default Web Site"
+    physical_path: "C:\\inetpub\\wwwroot"
+    state: started
+
+- name: Default Web Site - add ssl binding
+  win_iis_webbinding:
+    name: "Default Web Site"
+    certificate_hash: "{{ thumb.stdout_lines[0] }}"
+    port: "443"
+    protocol: "https"
+    state: present
+
+#- name: Create Directories
+#  win_file:
+#    path: "C:\\inetpub\\{{item}}"
+#    state: directory
+#  loop:
+#    - "contentstoreclient"
+#    - "titlestracker"
+#    - "technology"
+
+#- name: add websites
+#  win_iis_website:
+#    name: "{{item}}"
+#    hostname: "{{item}}.example.com"
+#    physical_path: "C:\\inetpub\\{{item}}"
+#    state: started
+#  loop:
+#    - "contentstoreclient"
+#    - "titlestracker"
+#    - "technology"
+
+#- name: add ssl bindings
+#  win_iis_webbinding:
+#    name: "{{item}}"
+#    host_header: "{{item}}.example.com"
+#    certificate_hash: "{{ thumb.stdout_lines[0] }}"
+#    port: "443"
+#    protocol: "https"
+#    state: present
+#  loop:
+#    - "contentstoreclient"
+#    - "titlestracker"
+#    - "technology"

@@ -1,0 +1,20 @@
+{
+	"metrics": {
+		"append_dimensions": {
+			"InstanceId": "${aws:InstanceId}"
+		},
+		"aggregation_dimensions": [
+            [
+              "InstanceId"
+            ]
+        ],
+		"metrics_collected": {
+			"Memory": {
+				"measurement": [
+					{"name": "% Committed Bytes In Use", "rename": "MemoryUtilization", "unit": "Percent"}
+				],
+				"metrics_collection_interval": 300
+			}
+		}
+	}
+}

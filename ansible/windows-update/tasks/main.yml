@@ -1,0 +1,18 @@
+---
+
+- name: Install all updates
+  win_updates:
+    category_names:
+      - SecurityUpdates
+      - CriticalUpdates
+      - UpdateRollups
+    reboot: no
+  register: update_result
+
+- name: Rebooting (if required)
+  win_reboot:
+    msg: Rebooting, update requirement.
+    connect_timeout: 60
+    post_reboot_delay: 200
+    test_command: Test-NetConnection -ComputerName localhost -Port {{ ansible_port }}
+  when: update_result.reboot_required

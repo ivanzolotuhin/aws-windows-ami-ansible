@@ -1,0 +1,7 @@
+---
+
+- include: windows.yml
+  when: ansible_os_family == 'Windows'
+
+- include: linux.yml
+  when: ansible_os_family != 'Windows'

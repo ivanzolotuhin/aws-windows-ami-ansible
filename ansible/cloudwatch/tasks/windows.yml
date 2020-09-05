@@ -1,0 +1,11 @@
+---
+
+- name: Install Cloudwatch
+  win_package:
+    path: https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi
+    product_id: '{0F661995-C308-4DBA-AF28-D9D4CF2CF33F}'
+
+- name: Copy configuration file
+  win_template:
+    src: config.json.j2
+    dest: "{{ windows.app_dir }}\\config.json"

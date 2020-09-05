@@ -1,0 +1,42 @@
+---
+
+- name: Install required packages (Debian)
+  apt:
+    name:
+    - unzip
+    - libwww-perl
+    - libdatetime-perl
+    state: present
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: Install required packages (RedHat)
+  yum:
+    name:
+    - zip
+    - unzip
+    - perl-Switch
+    - perl-DateTime
+    - perl-Sys-Syslog
+    - perl-LWP-Protocol-https
+    - perl-Digest-SHA
+    state: present
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+- name: Download and unarchive scripts
+  unarchive:
+    src: "{{ linux.source }}"
+    dest: /usr/local/bin
+    copy: no
+
+- name: Configure cron
+  cron:
+    name: "run aws cloudwatch"
+    minute: "*/5"
+    user: "root"
+    job: "/usr/local/bin/aws-scripts-mon/mon-put-instance-data.pl --mem-util --from-cron"
+    cron_file: aws_cloudwatch
+
+- name: Remove old cache
+  file:
+    path: /var/tmp/aws-mon/instance-id
+    state: absent

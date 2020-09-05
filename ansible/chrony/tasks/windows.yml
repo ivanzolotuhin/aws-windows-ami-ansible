@@ -1,0 +1,17 @@
+---
+
+- name: stop W32time service
+  win_service:
+    name: "{{ service }}"
+    state: stopped
+
+- name: configure W32time service
+  win_shell: |
+    w32tm /config /syncfromflags:manual /manualpeerlist:"169.254.169.123"
+    w32tm /config /reliable:yes
+
+- name: start W32time service
+  win_service:
+    name: "{{ service }}"
+    state: started
+    start_mode: auto

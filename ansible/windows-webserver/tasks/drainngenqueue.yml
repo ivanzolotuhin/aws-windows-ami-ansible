@@ -1,0 +1,12 @@
+---
+- name: DrainNGenQueue.ps1 DOWNLOAD
+  win_get_url:
+    url: "https://raw.githubusercontent.com/microsoft/dotnet/master/tools/DrainNGENQueue/DrainNGenQueue.ps1"
+    dest: "{{ temp }}\\DrainNGenQueue.ps1"
+    force: no
+
+- name: DrainNGenQueue.ps1 RUN
+  win_shell: '.\DrainNGenQueue.ps1'
+  ignore_errors: yes
+  args:
+    chdir: "{{ temp }}"

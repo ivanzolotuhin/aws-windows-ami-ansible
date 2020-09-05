@@ -1,0 +1,16 @@
+---
+
+- name: Install .net Features before windows update
+  ignore_errors: no
+  win_feature:
+    name: "{{ item }}"
+    restart: false
+    state: present
+  with_items:
+    - NET-Framework-Core
+    - NET-Framework-Features
+    - Web-Net-Ext
+    - Web-Net-Ext45
+    - NET-Framework-45-ASPNET
+    - Web-Asp-Net
+    - Web-Asp-Net45

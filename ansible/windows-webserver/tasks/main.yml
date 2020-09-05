@@ -1,0 +1,52 @@
+---
+- name: Install IIS with .net
+  ignore_errors: yes
+  win_feature:
+    name: "{{ item }}"
+    restart: false
+    state: present
+  with_items:
+    - Web-Server
+    - Web-WebServer
+    - Web-Filtering
+    - NET-Framework-45-ASPNET
+    - Web-Asp-Net45
+    - Web-Net-Ext45
+    - Web-Mgmt-Console
+    - Web-Mgmt-Tools
+    - Web-Dyn-Compression
+  when: "windows_type == 'server'"
+
+#- name: download Brotli X64
+#  win_get_url:
+#    url: "{{ item.src }}"
+#    dest: "{{ item.dst }}"
+#    force: no
+# loop:
+#  - { src: 'http://xxx.s3-website-eu-west-1.amazonaws.com/win/brotli/x64/brotli.dll', dst: 'C:\Windows\system32\inetsrv\brotli.dll' }
+#  - { src: 'http://xxx.s3-website-eu-west-1.amazonaws.com/win/brotli/x86/brotli.dll', dst: 'C:\Windows\syswow64\inetsrv\brotli.dll' }
+
+#- name: Setup IIS Logging and Compression
+#  raw: "{{ item }}"
+#  loop:
+#  - C:\Windows\System32\inetsrv\appcmd.exe set config -section:system.applicationHost/sites /siteDefaults.logFile.logExtFileFlags:"Date, Time, ClientIP, UserName, ServerIP, Method, UriStem, UriQuery, HttpStatus, Win32Status, BytesSent, BytesRecv, TimeTaken, ServerPort, UserAgent, Referer, Host, HttpSubStatus" /commit:apphost
+#  - C:\Windows\System32\inetsrv\appcmd.exe set config -section:system.webServer/httpCompression /+"dynamicTypes.[mimeType='application/json',enabled='True']" /commit:apphost
+#  - C:\Windows\System32\Inetsrv\Appcmd.exe set config -section:system.webServer/httpCompression /+"dynamicTypes.[mimeType='text/css',enabled='True']" /commit:apphost
+#  - C:\Windows\System32\inetsrv\appcmd.exe set config -section:httpCompression -noCompressionForHttp10:False /commit:apphost
+#  - C:\Windows\System32\inetsrv\appcmd.exe set config -section:httpCompression -noCompressionForProxies:False /commit:apphost
+#  - C:\Windows\system32\inetsrv\appcmd.exe set config -section:system.webServer/httpCompression /+"[name='br',dll='%windir%\system32\inetsrv\brotli.dll',dynamicCompressionLevel='5',staticCompressionLevel='11']" /commit:apphost
+#  - C:\Windows\system32\inetsrv\appcmd.exe clear config -section:httpCompression -"[name='gzip']"
+#  - C:\Windows\system32\inetsrv\appcmd.exe set config -section:system.webServer/httpCompression /+"[name='gzip',dll='%windir%\system32\inetsrv\gzip.dll']" /commit:apphost
+
+- include: websites.yml
+
+- include: drainngenqueue.yml
+
+- name: Rebooting
+  win_reboot:
+    msg: Rebooting
+    connect_timeout: 60
+    test_command: Test-NetConnection -ComputerName localhost -Port {{ ansible_port }}
+
+- name: Sleep
+  pause: seconds=120
